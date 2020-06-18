@@ -27,6 +27,24 @@ Char_Ptr_To_Ptr parse_command(Char_Ptr line){
   return command;
 }
 
+void execute_command(Char_Ptr_To_Ptr command){
+  int pid = fork();
+  if(pid < 0)
+  {
+    printf("Something went wrong system brake...\n");
+  }
+  else if (pid == 0)
+  {
+    if(execvp(command[0], command) < 0){
+      printf("Command not found: %s\n", command[0]);
+    }
+  }
+  else
+  {
+    wait(&pid);
+  }
+}
+
 int main(void){
   while (1)
   {
@@ -34,8 +52,10 @@ int main(void){
     printf("my-shell $ ");
     gets(line);
     Char_Ptr_To_Ptr command = parse_command(line);
-    printf("a is located at %s\n",command[0]);
-    printf("a is located at %s\n",command[1]);
+    if (strcmp(command[0], "exit") == 0){
+      exit(0);
+    }
+    execute_command(command);
   }
   return 0;
 }
