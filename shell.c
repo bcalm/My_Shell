@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 typedef char * Char_Ptr;
 typedef Char_Ptr* Char_Ptr_To_Ptr;
@@ -27,14 +28,20 @@ Char_Ptr_To_Ptr parse_command(Char_Ptr line){
   return command;
 }
 
+void handle_ctrl_c(int signum){
+  exit(0);
+}
+
 void execute_command(Char_Ptr_To_Ptr command){
   int pid = fork();
+  signal(SIGINT, SIG_IGN);
   if(pid < 0)
   {
     printf("Something went wrong system brake...\n");
   }
   else if (pid == 0)
   {
+    signal(SIGINT, handle_ctrl_c);
     if(execvp(command[0], command) < 0){
       printf("Command not found: %s\n", command[0]);
     }
@@ -45,6 +52,19 @@ void execute_command(Char_Ptr_To_Ptr command){
   }
 }
 
+int handle_built_in(Char_Ptr_To_Ptr command){
+  if (strcmp(command[0], "exit") == 0)
+  {
+    exit(0);
+  }
+  if (strcmp(command[0], "cd") == 0)
+  {
+    chdir(command[1]);
+    return 1;
+  }
+  return 0;
+}
+
 int main(void){
   while (1)
   {
@@ -52,10 +72,10 @@ int main(void){
     printf("my-shell $ ");
     gets(line);
     Char_Ptr_To_Ptr command = parse_command(line);
-    if (strcmp(command[0], "exit") == 0){
-      exit(0);
+    if(!handle_built_in(command)){
+      execute_command(command);
     }
-    execute_command(command);
   }
   return 0;
 }
+
