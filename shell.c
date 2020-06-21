@@ -32,8 +32,9 @@ void handle_ctrl_c(int signum){
   exit(0);
 }
 
-void execute_command(Char_Ptr_To_Ptr command){
+int execute_command(Char_Ptr_To_Ptr command){
   int pid = fork();
+  int exit_code = 0;
   signal(SIGINT, SIG_IGN);
   if(pid < 0)
   {
@@ -42,14 +43,17 @@ void execute_command(Char_Ptr_To_Ptr command){
   else if (pid == 0)
   {
     signal(SIGINT, handle_ctrl_c);
-    if(execvp(command[0], command) < 0){
+    exit_code = execvp(command[0], command);
+    if(exit_code < 0){
       printf("Command not found: %s\n", command[0]);
     }
+
   }
   else
   {
     wait(&pid);
   }
+  return exit_code;
 }
 
 int handle_built_in(Char_Ptr_To_Ptr command){
@@ -65,15 +69,31 @@ int handle_built_in(Char_Ptr_To_Ptr command){
   return 0;
 }
 
+void set_color(Char_Ptr color_code){
+  printf("\033%s", color_code);
+}
+
 int main(void){
+  int exit_code = 0;
+  Char_Ptr green = "[0;32m";
+  Char_Ptr red = "[0;31m";
+  Char_Ptr reset = "[0m";
   while (1)
   {
+    Char_Ptr color = green;
     char line[255];
-    printf("my-shell $ ");
+    set_color(color);
+    printf("my-shell ");
+    if(exit_code) {
+      color = red;
+    }
+    set_color(color);
+    printf("$  ");
+    set_color(reset);
     gets(line);
     Char_Ptr_To_Ptr command = parse_command(line);
     if(!handle_built_in(command)){
-      execute_command(command);
+      exit_code = execute_command(command) || 0;
     }
   }
   return 0;
