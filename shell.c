@@ -1,6 +1,5 @@
 #include "shell.h"
 
-
 void handle_ctrl_c(int signum){
   exit(0);
 }
@@ -45,3 +44,6 @@ int handle_built_in(Char_Ptr_To_Ptr command){
   return 0;
 }
 
+int execute_pipe(Char_Ptr_To_Ptr command, Char_Ptr_To_Ptr pipe_args){
+  return 1;
+}

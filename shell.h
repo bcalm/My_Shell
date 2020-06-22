@@ -21,5 +21,8 @@ int execute_command(Char_Ptr_To_Ptr);
 Char_Ptr_To_Ptr parse_command(Char_Ptr);
 int handle_built_in(Char_Ptr_To_Ptr);
 void handle_ctrl_c(int);
+int parse_pipe(Char_Ptr, Char_Ptr_To_Ptr);
+void parse_space(Char_Ptr, Char_Ptr_To_Ptr);
+int execute_pipe(Char_Ptr_To_Ptr, Char_Ptr_To_Ptr);
 
 #endif
