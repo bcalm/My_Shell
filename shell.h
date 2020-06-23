@@ -14,12 +14,21 @@ typedef Char_Ptr* Char_Ptr_To_Ptr;
 #define BLUE "[0;34m" 
 #define BOLD_CYAN "[0;36m" 
 #define RESET "[0m" 
+#define READ  0
+#define WRITE 1
+
+enum commands_code
+{
+ BUILT_IN,
+ SIMPLE_COMMAND,
+ PIPE,
+ MULTIPLE_COMMAND 
+};
 
 void set_color(Char_Ptr);
 void print_dir();
-int execute_command(Char_Ptr_To_Ptr);
-Char_Ptr_To_Ptr parse_command(Char_Ptr);
-int handle_built_in(Char_Ptr_To_Ptr);
+int execute_basic_commands(Char_Ptr_To_Ptr);
+int execute_built_in_commands(Char_Ptr_To_Ptr);
 void handle_ctrl_c(int);
 int parse_pipe(Char_Ptr, Char_Ptr_To_Ptr);
 void parse_space(Char_Ptr, Char_Ptr_To_Ptr);

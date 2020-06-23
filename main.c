@@ -25,42 +25,42 @@ void __print_prompt(int exit_code){
     set_color(RESET);
 }
 
-int handle_input(Char_Ptr line, Char_Ptr_To_Ptr command, Char_Ptr_To_Ptr pipe_args){
+int handle_input(Char_Ptr line, Char_Ptr_To_Ptr* commands){
     Char_Ptr strpiped[2]; 
     int piped = 0; 
-  
-    piped = parse_pipe(line, strpiped); 
-  
-    if (piped) { 
-      parse_space(strpiped[0], command); 
-      parse_space(strpiped[1], pipe_args); 
-  
-    } else { 
-      parse_space(line, command); 
-    } 
+    commands[0] = malloc(sizeof(Char_Ptr_To_Ptr));
 
-    if (handle_built_in(command)) 
-        return 0; 
-    else
-        return 1 + piped; 
+    if (parse_pipe(line, strpiped)) { 
+      commands[1] = malloc(sizeof(Char_Ptr_To_Ptr));
+      parse_space(strpiped[0], commands[0]); 
+      parse_space(strpiped[1], commands[1]); 
+      return PIPE;
+    }
+    parse_space(line, commands[0]);
+
+    if (execute_built_in_commands(commands[0])) 
+    {
+      return BUILT_IN; 
+    }
+    return SIMPLE_COMMAND;
 }
 
 int main(void){
   int exit_code = 0;
-  Char_Ptr pipe_args[2];
-  Char_Ptr command[10];
-
+  Char_Ptr_To_Ptr commands[10];
   while (1)
   {
     __print_prompt(exit_code);
     char line[255];
     gets(line);
-    int process_code = handle_input(line, command, pipe_args);
-    if(process_code == 1){
-      exit_code = execute_command(command);
+    int command_code = handle_input(line, commands);
+
+    if(command_code == SIMPLE_COMMAND){
+      exit_code = execute_basic_commands(commands[0]);
     }
-    if(process_code == 2){
-      exit_code = execute_pipe(command, pipe_args);
+
+    if(command_code == PIPE){
+      exit_code = execute_pipe(commands[0], commands[1]);
     }
   }
   return 0;
