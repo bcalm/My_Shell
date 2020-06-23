@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <math.h>
 
 typedef char * Char_Ptr;
 typedef Char_Ptr* Char_Ptr_To_Ptr;
@@ -30,7 +31,7 @@ void print_dir();
 int execute_basic_commands(Char_Ptr_To_Ptr);
 int execute_built_in_commands(Char_Ptr_To_Ptr);
 void handle_ctrl_c(int);
-int parse_pipe(Char_Ptr, Char_Ptr_To_Ptr);
+int parse(Char_Ptr, Char_Ptr_To_Ptr, Char_Ptr);
 void parse_space(Char_Ptr, Char_Ptr_To_Ptr);
 int execute_pipe(Char_Ptr_To_Ptr, Char_Ptr_To_Ptr);
 

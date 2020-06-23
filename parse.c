@@ -12,19 +12,16 @@ void parse_space(Char_Ptr line, Char_Ptr_To_Ptr command)
   } 
 } 
 
-int parse_pipe(Char_Ptr line, Char_Ptr_To_Ptr commands) 
-{ 
-    int i; 
-    for (i = 0; i < 2; i++) { 
-        commands[i] = strsep(&line, "|"); 
-        if (commands[i] == NULL) 
-            break; 
-    } 
-  
-    if (commands[1] == NULL) 
-        return 0;  
-    else { 
-        return 1; 
-    } 
+int parse(Char_Ptr line, Char_Ptr_To_Ptr commands, Char_Ptr parse_by) 
+{   
+  int count;
+  for (count = 0; count < 10; count++) { 
+      commands[count] = strsep(&line, parse_by); 
+      if (commands[count] == NULL) 
+          break; 
+      
+  } 
+  return count;  
 } 
+
 
