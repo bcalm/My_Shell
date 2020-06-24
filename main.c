@@ -31,14 +31,16 @@ void __assign_commands(Char_Ptr_To_Ptr * commands,int length, Char_Ptr_To_Ptr te
       commands[i] = malloc(sizeof(Char_Ptr_To_Ptr));
       commands[i] = parse_space(temp[i]); 
     }
+  commands[length] = NULL;
 }
 
-int __handle_input(Char_Ptr line, Char_Ptr_To_Ptr* commands){
+int __handle_input(Char_Ptr line, Char_Ptr_To_Ptr* commands, int* command_count){
   Char_Ptr temp[10]; 
   
   int piped = parse(line, temp, "|");
   if (piped > 1) { 
     __assign_commands(commands, piped, temp);
+    *command_count = piped;
     return PIPE;
   }
   commands[0] = malloc(sizeof(Char_Ptr_To_Ptr));
@@ -52,12 +54,13 @@ int __handle_input(Char_Ptr line, Char_Ptr_To_Ptr* commands){
 
 int __run(Char_Ptr line, Char_Ptr_To_Ptr * commands){
   int exit_code = 0;
-  int command_code = __handle_input(line, commands);
+  int  command_count = 0;
+  int command_code = __handle_input(line, commands, &command_count);
   if(command_code == SIMPLE_COMMAND){
     exit_code = execute_basic_commands(commands[0]);
   }
   if(command_code == PIPE){
-    exit_code = execute_pipe(commands[0], commands[1]);
+    execute_pipes(commands, command_count -1);
   }
   return exit_code;
 }
