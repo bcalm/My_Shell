@@ -29,31 +29,28 @@ void __assign_commands(Char_Ptr_To_Ptr * commands,int length, Char_Ptr_To_Ptr te
   for (size_t i = 0; i < length; i++)
     {
       commands[i] = malloc(sizeof(Char_Ptr_To_Ptr));
-      parse_space(temp[i], commands[i]); 
-      printf("%s\n", temp[i]);
+      commands[i] = parse_space(temp[i]); 
     }
 }
 
 int __handle_input(Char_Ptr line, Char_Ptr_To_Ptr* commands){
-    Char_Ptr temp[10]; 
-    
-    int piped = parse(line, temp, "|");
-    if (piped > 1) { 
-      __assign_commands(commands, piped, temp);
-      return PIPE;
-    }
-
-    commands[0] = malloc(sizeof(Char_Ptr_To_Ptr));
-    parse_space(line, commands[0]);
-
-    if (execute_built_in_commands(commands[0])) 
-    {
-      return BUILT_IN; 
-    }
-    return SIMPLE_COMMAND;
+  Char_Ptr temp[10]; 
+  
+  int piped = parse(line, temp, "|");
+  if (piped > 1) { 
+    __assign_commands(commands, piped, temp);
+    return PIPE;
+  }
+  commands[0] = malloc(sizeof(Char_Ptr_To_Ptr));
+  commands[0] = parse_space(line);
+  if (execute_built_in_commands(commands[0])) 
+  {
+    return BUILT_IN; 
+  }
+  return SIMPLE_COMMAND;
 }
 
-int run(Char_Ptr line, Char_Ptr_To_Ptr * commands){
+int __run(Char_Ptr line, Char_Ptr_To_Ptr * commands){
   int exit_code = 0;
   int command_code = __handle_input(line, commands);
   if(command_code == SIMPLE_COMMAND){
@@ -65,13 +62,13 @@ int run(Char_Ptr line, Char_Ptr_To_Ptr * commands){
   return exit_code;
 }
 
-int handle_multiple_commands(Char_Ptr line, Char_Ptr_To_Ptr* commands, int* exit_code){
+int __handle_multiple_commands(Char_Ptr line, Char_Ptr_To_Ptr* commands, int* exit_code){
   Char_Ptr temp[10];
   int multiple_commands  = parse(line, temp, ";");
   if(multiple_commands > 1){
     for (size_t i = 0; i < multiple_commands; i++)
     {
-      *exit_code = run(temp[i], commands);
+      *exit_code = __run(temp[i], commands);
     }
   }
   return multiple_commands - 1;
@@ -87,8 +84,8 @@ int main(void){
     char line[255];
     gets(line);
 
-    if(!handle_multiple_commands(line, commands, &exit_code)){
-      exit_code = run(line, commands);
+    if(!__handle_multiple_commands(line, commands, &exit_code)){
+      exit_code = __run(line, commands);
     }
   }
   return 0;

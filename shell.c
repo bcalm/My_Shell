@@ -46,7 +46,6 @@ int execute_built_in_commands(Char_Ptr_To_Ptr command){
 
 void __check_error(int exit_code, Char_Ptr error){
   if(exit_code < 0){
-  printf("%d\n", exit_code);
     printf("Command not found: ");
     set_color(RED);
     printf("%s\n", error);
@@ -74,48 +73,25 @@ int __execute_second_command(int * pipefd, Char_Ptr_To_Ptr command){
   return exit_code;
 }
 
-int execute_pipe(Char_Ptr_To_Ptr command, Char_Ptr_To_Ptr pipe_args){
+int execute_pipe(Char_Ptr_To_Ptr command, Char_Ptr_To_Ptr pipe_args) {
+  int pid_1 = fork();
   int exit_code = 0;
-  int pipefd[2];  
-  int pid_1, pid_2; 
-  Char_Ptr_To_Ptr dummy_command1 = malloc(sizeof(Char_Ptr)* 3);
-  dummy_command1[0] = malloc(sizeof(Char_Ptr));
-  dummy_command1[0] = "cat";
-  dummy_command1[1] = malloc(sizeof(Char_Ptr));
-  dummy_command1[1] = "shell.c";
-  dummy_command1[2] = malloc(sizeof(Char_Ptr));
-  dummy_command1[2] = NULL;
-  Char_Ptr_To_Ptr dummy_command2 = malloc(sizeof(Char_Ptr)* 2);
-  dummy_command2[0] = malloc(sizeof(Char_Ptr));
-  dummy_command2[0] = "grep";
-  dummy_command2[1] = malloc(sizeof(Char_Ptr));
-  dummy_command2[1] = "execute";
-  dummy_command2[2] = malloc(sizeof(Char_Ptr));
-  dummy_command2[2] = NULL;
-  if (pipe(pipefd) < 0) { 
-    printf("\nPipe could not be initialized"); 
-    return 1; 
-  } 
-  pid_1 = fork(); 
-  if(pid_1 < 0){
-    printf("Something went wrong in initializing fork...\n");
-    return 1;
+  if(!pid_1) {
+    int fd[2];
+    if (pipe(fd) == -1) {
+      fprintf(stderr, "error creating pipe\n");
+    }
+    int pid_2 = fork();
+    if (pid_2 == -1) {
+      fprintf(stderr, "error forking process\n");
+    }
+    if (!pid_2) {
+      exit_code = __execute_first_command(fd, command);
+    }
+    exit_code = __execute_second_command(fd, pipe_args);
+    wait(&pid_2);
+  } else {
+    wait(&pid_1);
   }
-
-  if (pid_1 == 0) { 
-    __execute_first_command(pipefd, dummy_command1);
-  } else { 
-      pid_2 = fork(); 
-      if(pid_2 < 0 ){
-        printf("Something went wrong in initializing fork...\n");
-        return 1;
-      }
-      if (pid_2 == 0) { 
-        __execute_second_command(pipefd, dummy_command2);
-      } else { 
-        wait(&pid_2); 
-        wait(&pid_1); 
-      } 
-  }
-  return exit_code; 
+  return exit_code;
 }

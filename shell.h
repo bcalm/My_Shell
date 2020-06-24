@@ -32,7 +32,7 @@ int execute_basic_commands(Char_Ptr_To_Ptr);
 int execute_built_in_commands(Char_Ptr_To_Ptr);
 void handle_ctrl_c(int);
 int parse(Char_Ptr, Char_Ptr_To_Ptr, Char_Ptr);
-void parse_space(Char_Ptr, Char_Ptr_To_Ptr);
+Char_Ptr_To_Ptr parse_space(Char_Ptr);
 int execute_pipe(Char_Ptr_To_Ptr, Char_Ptr_To_Ptr);
 
 #endif
